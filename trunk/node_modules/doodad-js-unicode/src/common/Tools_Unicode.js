@@ -110,11 +110,114 @@
 				// Unicode 
 				//===================================
 
-				unicode.fromCodePoint = root.DD_DOC(
+				unicode.codePointToCharCodes = root.DD_DOC(
 					//! REPLACE_BY("null")
 					{
 								author: "Claude Petit",
 								revision: 0,
+								params: {
+									codePoint: {
+										type: 'integer',
+										optional: false,
+										description: "Code point.",
+									},
+								},
+								returns: 'object',
+								description: "Returns code point surrogates.",
+					}
+					//! END_REPLACE()
+					, (function codePointToCharCodes(codePoint) {
+						// Source: http://www.2ality.com/2013/09/javascript-unicode.html
+
+						if (codePoint < 0x10000) {
+							return {
+								leadSurrogate: codePoint, 
+							};
+						};
+					
+						codePoint -= 0x10000;
+					
+						// Shift right to get to most significant 10 bits
+						var leadSurrogate = 0xD800 + (codePoint >> 10);
+					
+						// Mask to get least significant 10 bits
+						var tailSurrogate = 0xDC00 + (codePoint & 0x03FF);
+					
+						return {
+							leadSurrogate: leadSurrogate, 
+							tailSurrogate: tailSurrogate,
+						};
+					}));
+
+				unicode.charCodesToCodePoint = root.DD_DOC(
+					//! REPLACE_BY("null")
+					{
+								author: "Claude Petit",
+								revision: 0,
+								params: {
+									surrogates: {
+										type: 'object',
+										optional: false,
+										description: "Surrogates.",
+									},
+								},
+								returns: 'object',
+								description: "Returns code point from surrogates.",
+					}
+					//! END_REPLACE()
+					, function charCodesToCodePoint(surrogates) {
+							var leadSurrogate = surrogates.leadSurrogate;
+						
+							if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
+								return {
+									codePoint: leadSurrogate,
+									size: 1,
+									complete: true,
+									valid: true,
+								};
+							};
+					
+							var tailSurrogate = surrogates.tailSurrogate;
+					
+							if (types.isNothing(tailSurrogate)) {
+								// Incomplete UTF16 sequence
+								return {
+									codePoint: leadSurrogate,
+									size: 2,
+									complete: false,
+									valid: false,
+								};
+							};
+					
+							if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
+								// Invalid UTF16 sequence. Returns the lead surrogate.
+								return {
+									codePoint: leadSurrogate,
+									size: 1,
+									complete: true,
+									valid: false,
+								};
+							};
+					
+							var codePoint = tailSurrogate - 0xDC00;
+					
+							codePoint += ((leadSurrogate - 0xD800) << 10);
+					
+							codePoint += 0x10000;
+					
+							return {
+								codePoint: codePoint,
+								size: 2,
+								complete: true,
+								valid: true,
+							};
+					});
+
+				unicode.fromCodePoint = root.DD_DOC(
+					//! REPLACE_BY("null")
+					{
+								author: "Claude Petit",
+								revision: 1,
 								params: {
 									codePoint: {
 										type: 'integer',
@@ -127,28 +230,22 @@
 					}
 					//! END_REPLACE()
 					, (__Internal__.supportsCodePoint ? __Natives__.stringFromCodePoint : function fromCodePoint(codePoint) {
-						// Source: http://www.2ality.com/2013/09/javascript-unicode.html
-
-						if (codePoint <= 0xFFFF) {
-							return __Natives__.stringFromCharCode(codePoint);
+						var surrogates = unicode.codePointToCharCodes(codePoint);
+					
+						var chr = __Natives__.stringFromCharCode(surrogates.leadSurrogate);
+						
+						if (!types.isNothing(surrogates.tailSurrogate)) {
+							chr += __Natives__.stringFromCharCode(surrogates.tailSurrogate);
 						};
-					
-						codePoint -= 0x10000;
-					
-						// Shift right to get to most significant 10 bits
-						var leadSurrogate = 0xD800 + (codePoint >> 10);
-					
-						// Mask to get least significant 10 bits
-						var tailSurrogate = 0xDC00 + (codePoint & 0x03FF);
-					
-						return __Natives__.stringFromCharCode(leadSurrogate) + __Natives__.stringFromCharCode(tailSurrogate);
+						
+						return chr;
 					}));
 
 				unicode.codePointAt = root.DD_DOC(
 					//! REPLACE_BY("null")
 					{
 								author: "Claude Petit",
-								revision: 0,
+								revision: 1,
 								params: {
 									str: {
 										type: 'string',
@@ -160,80 +257,77 @@
 										optional: true,
 										description: "Position. Default is '0'.",
 									},
-									allowIncomplete: {
-										type: 'bool',
-										optional: true,
-										description: "Allow returning an incomplete sequence. Default is 'false'.",
-									},
 								},
 								returns: 'array',
-								description: "Returns an array of two items : The Unicode 'code point' from a string at the specified position, and the character's length. On incomplete sequence, code point is negative.",
+								description: "Returns an array of two items : The Unicode 'code point' from a string at the specified position, and the character's length.",
 					}
 					//! END_REPLACE()
 					, (__Internal__.supportsCodePoint ?
-						function codePointAt(str, /*optional*/index, /*optional*/allowIncomplete) {
+						function codePointAt(str, /*optional*/index) {
+							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
+
 							var codePoint = __Natives__.stringCodePointAt.call(str, index);
 							
 							if (codePoint === undefined) {
 								// Invalid index
-								return undefined;
+								return null;
 							};
 							
-							if ((codePoint >= 0xD800) && (codePoint <= 0xDFFF) && ((index + 1) >= str.length)) {
-								// Incomplete Unicode sequence
-								if (allowIncomplete) {
-									return [codePoint, 1];
+							if ((codePoint >= 0xD800) && (codePoint <= 0xDFFF)) {
+								if ((index + 1) >= str.length) {
+									// Incomplete UTF16 sequence.
+									return {
+										codePoint: codePoint,
+										size: 2,
+										complete: false,
+										valid: false,
+									};
 								} else {
-									return [-1, 2];
+									// Invalid UTF16 sequence. Returns the lead surrogate.
+									return {
+										codePoint: codePoint,
+										size: 1,
+										complete: true,
+										valid: false,
+									};
+								};
+							} else {
+								return {
+									codePoint: codePoint,
+									size: (codePoint >= 0x10000 ? 2 : 1),
+									complete: true,
+									valid: true,
 								};
 							};
 							
-							return [codePoint, (codePoint >= 0x10000 ? 2 : 1)];
-							
-						} : function codePointAt(str, /*optional*/index, /*optional*/allowIncomplete) {
-							var leadSurrogate = __Natives__.stringCharCodeAt.call(str, index);
-					
-							if (types.isNaN(leadSurrogate)) {
-								// Invalid index
-								return undefined;
-							};
-					
+						} : function codePointAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
-								return [leadSurrogate, 1];
+							var leadSurrogate = __Natives__.stringCharCodeAt.call(str, index);
+
+							if (types.isNaN(leadSurrogate)) {
+								// Invalid index
+								return null;
 							};
-					
-							if (index + 1 >= str.length) {
-								// Incomplete Unicode sequence
-								if (allowIncomplete) {
-									return [leadSurrogate, 1]
-								} else {
-									return [-1, 2];
-								};
-							};
-					
+							
 							var tailSurrogate = __Natives__.stringCharCodeAt.call(str, index + 1);
-					
-							if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
-								// Lead surrogate alone.
-								return [leadSurrogate, 1];
+							
+							var surrogates = {
+								leadSurrogate: leadSurrogate,
 							};
-					
-							var codePoint = tailSurrogate - 0xDC00;
-					
-							codePoint += ((leadSurrogate - 0xD800) << 10);
-					
-							codePoint += 0x10000;
-					
-							return [codePoint, 2];
+							
+							if (!types.isNaN(tailSurrogate)) {
+								surrogates.tailSurrogate = tailSurrogate;
+							};
+
+							return unicode.charCodesToCodePoint(surrogates);
 						}));
 
 				unicode.charAt = root.DD_DOC(
 					//! REPLACE_BY("null")
 					{
 								author: "Claude Petit",
-								revision: 0,
+								revision: 1,
 								params: {
 									str: {
 										type: 'string',
@@ -245,62 +339,34 @@
 										optional: true,
 										description: "Position. Default is 0.",
 									},
-									allowIncomplete: {
-										type: 'bool',
-										optional: true,
-										description: "Allow returning an incomplete sequence. Default is 'false'.",
-									},
 								},
 								returns: 'string',
 								description: "Returns the complete Unicode character sequence from the specified position. Use its 'length' property to get its size.",
 					}
 					//! END_REPLACE()
-					, (__Internal__.supportsCodePoint ?
-						function charAt(str, /*optional*/index, /*optional*/allowIncomplete) {
+					, function charAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var codePoint = __Natives__.stringCodePointAt.call(str, index),
-								size = (codePoint >= 0x10000 ? 2 : 1);
-								
-							if (!allowIncomplete && (codePoint >= 0xD800) && (codePoint <= 0xDFFF) && ((index + 1) >= str.length)) {
-								// Incomplete Unicode sequence
+							var codePoint = types.codePointAt(str, index);
+							
+							if (types.isNothing(codePoint)) {
+								// Invalid index
+								return null;
+							};
+					
+							if (!codePoint.valid) {
+								// Incomplete or Invalid UTF16 sequence
 								return "";
 							};
 							
-							return str.slice(index, index + size);
-
-						} : function charAt(str, index) {
-							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
-						
-							var leadSurrogate = __Natives__.stringCharCodeAt.call(str, index);
-					
-							var size = 2;
-							if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
-								size = 1;
-							} else if (index + 1 >= str.length) {
-								// Incomplete Unicode sequence
-								if (allowIncomplete) {
-									return str.slice(index);
-								} else {
-									return "";
-								};
-							} else {
-								var tailSurrogate = __Natives__.stringCharCodeAt.call(str, index + 1);
-						
-								if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
-									// Invalid Unicode sequence. Returns the lead surrogate.
-									size = 1;
-								};
-							};
-					
-							return str.slice(index, index + size);
-						}));
+							return str.slice(index, index + codePoint.size);
+						});
 
 				unicode.nextChar = root.DD_DOC(
 					//! REPLACE_BY("null")
 					{
 								author: "Claude Petit",
-								revision: 0,
+								revision: 1,
 								params: {
 									str: {
 										type: 'string',
@@ -317,11 +383,6 @@
 										optional: true,
 										description: "End position, exclusive. Default is string's length.",
 									},
-									allowIncomplete: {
-										type: 'bool',
-										optional: true,
-										description: "Allow returning an incomplete sequence. Default is 'false'.",
-									},
 									seek: {
 										type: 'integer',
 										optional: true,
@@ -332,7 +393,7 @@
 								description: "Returns an object with the next Unicode character sequence from the specified position and the 'nextChar' function with preset arguments.",
 					}
 					//! END_REPLACE()
-					, function nextChar(str, /*optional*/start, /*optional*/end, /*optional*/allowIncomplete, /* <<< BIND */ /*optional*/seek) {
+					, function nextChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
 							if (types.isNothing(seek)) {
 								start = (start | 0);  // null|undefined|true|false|NaN|Infinity
 							} else {
@@ -348,23 +409,23 @@
 								// End position reached
 								return null;
 							};
-							var codePoint = unicode.codePointAt(str, start, allowIncomplete),
-								size = codePoint[1];
-							codePoint = codePoint[0];
-							var chr = '';
-							if (codePoint >= 0) {
-								if (start + size - 1 >= end) {
-									// End position reached
-									return null;
-								};
-								chr = str.slice(start, start + size);
+							var codePoint = unicode.codePointAt(str, start);
+							if (types.isNothing(codePoint)) {
+								// Invalid index
+								return null;
 							};
+							if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
+								// End position reached
+								return null;
+							};
+							var chr = str.slice(start, start + codePoint.size);
 							return {
 								index: start,
-								codePoint: codePoint,
-								size: size,
+								codePoint: codePoint.codePoint,
+								size: codePoint.size,
 								chr: chr,
-								nextChar: types.bind(null, unicode.nextChar, [str, start + size, end, allowIncomplete]),
+								complete: codePoint.complete,
+								nextChar: types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]),
 							};
 						});
 
