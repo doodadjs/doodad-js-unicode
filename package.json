@@ -1,6 +1,6 @@
 {
   "name": "doodad-js-unicode",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "doodad-js Unicode Tools (alpha)",
   "homepage": "https://sourceforge.net/projects/doodad-js/",
   "config": {
@@ -36,10 +36,10 @@
     "email" : "doodadjs@gmail.com"
   },
   "dependencies": {
-    "doodad-js": "^2.0.0"
+    "doodad-js": "^2.2.0"
   },
   "devDependencies": {
-    "doodad-js-make": "^0.3.0"
+    "doodad-js-make": "^0.3.2"
   },
   "tonicExampleFilename": "tonic.js",
   "browser": "./browserify.js"
