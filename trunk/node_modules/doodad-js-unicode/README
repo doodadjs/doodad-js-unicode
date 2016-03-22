@@ -13,8 +13,6 @@ $ npm install doodad-js-unicode
 ## Features
 
   -  Code points management.
-  -  Test a character for an Unicode character class.
-  -  More to come...
 
 ## Quick Start
 

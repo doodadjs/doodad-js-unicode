@@ -35,16 +35,16 @@
 		DD_MODULES = (DD_MODULES || {});
 		DD_MODULES['Doodad.Tools.Unicode'] = {
 			type: null,
-			version: '0.1.0a',
+			version: '0.3.0a',
 			namespaces: null,
 			dependencies: [
 				{
 					name: 'Doodad.Tools',
-					version: '2.0.0',
+					version: '2.2.0',
 				},
 				{
 					name: 'Doodad.Types',
-					version: '2.0.0',
+					version: '2.2.0',
 				},
 			],
 			exports: exports,
@@ -86,7 +86,8 @@
 				//===================================
 					
 				try {
-					__Internal__.supportsCodePoint = (eval("'\\u{00010428}'") && true);
+					types.eval("'\\u{00010428}'");
+					__Internal__.supportsCodePoint = true;
 				} catch (ex) {
 					__Internal__.supportsCodePoint = false;
 				};
@@ -337,7 +338,7 @@
 									index: {
 										type: 'integer',
 										optional: true,
-										description: "Position. Default is 0.",
+										description: "Position. Default is 0. Note: Position is not by character.",
 									},
 								},
 								returns: 'string',
@@ -347,7 +348,7 @@
 					, function charAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var codePoint = types.codePointAt(str, index);
+							var codePoint = unicode.codePointAt(str, index);
 							
 							if (types.isNothing(codePoint)) {
 								// Invalid index
@@ -376,21 +377,21 @@
 									start: {
 										type: 'integer',
 										optional: true,
-										description: "Start position, inclusive. Default is 0.",
+										description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
 									},
 									end: {
 										type: 'integer',
 										optional: true,
-										description: "End position, exclusive. Default is string's length.",
+										description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
 									},
 									seek: {
 										type: 'integer',
 										optional: true,
-										description: "Seek to a new position. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
+										description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
 									},
 								},
 								returns: 'object',
-								description: "Returns an object with the next Unicode character sequence from the specified position and the 'nextChar' function with preset arguments.",
+								description: "Returns an object with the next Unicode character sequence from the specified position.",
 					}
 					//! END_REPLACE()
 					, function nextChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
@@ -419,82 +420,132 @@
 								return null;
 							};
 							var chr = str.slice(start, start + codePoint.size);
+							var nextCharFn = types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]);
+							var prevCharFn = types.bind(null, unicode.prevChar, [str, start, end]);
 							return {
 								index: start,
 								codePoint: codePoint.codePoint,
 								size: codePoint.size,
 								chr: chr,
 								complete: codePoint.complete,
-								nextChar: types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]),
+								nextChar: nextCharFn,
+								prevChar: prevCharFn,
 							};
 						});
 
-				unicode.isClass = function isClass(className, chr, localeData) {
-					var cls = localeData.LC_CTYPE.classes[className];
-					if (!cls && (className === 'alnum')) {
-						// NOTE: "alnum" is not in the database.
-						return unicode.isClass('digit', chr, localeData) || unicode.isClass('alpha', chr, localeData);
-					};
-					if (!cls) {
-						throw new types.Error("Unknow Unicode class '~0~'.", [className]);
-					};
-					return cls.regExp.test(chr);
-				};
 
-				unicode.isLower = function isLower(chr, localeData) {
-					return unicode.isClass('lower', chr, localeData);
-				};
-				
-				unicode.isUpper = function isUpper(chr, localeData) {
-					return unicode.isClass('upper', chr, localeData);
-				};
-				
-				unicode.isAlpha = function isAlpha(chr, localeData) {
-					return unicode.isClass('alpha', chr, localeData);
-				};
-				
-				unicode.isDigit = function isDigit(chr, localeData) {
-					return unicode.isClass('digit', chr, localeData);
-				};
-				
-				unicode.isAlnum = function isAlnum(chr, localeData) {
-					return unicode.isClass('alnum', chr, localeData);
-				};
-				
-				unicode.isHexDigit = function isHexDigit(chr, localeData) {
-					return unicode.isClass('xdigit', chr, localeData);
-				};
-				
-				unicode.isPunct = function isPunct(chr, localeData) {
-					return unicode.isClass('punct', chr, localeData);
-				};
-				
-				unicode.isSpace = function isSpace(chr, localeData) {
-					return unicode.isClass('space', chr, localeData);
-				};
-				
-				unicode.isBlank = function isBlank(chr, localeData) {
-					return unicode.isClass('blank', chr, localeData);
-				};
-				
-				unicode.isGraph = function isGraph(chr, localeData) {
-					return unicode.isClass('graph', chr, localeData);
-				};
-				
-				unicode.isPrint = function isPrint(chr, localeData) {
-					return unicode.isClass('print', chr, localeData);
-				};
-				
-				unicode.isCntrl = function isCntrl(chr, localeData) {
-					return unicode.isClass('cntrl', chr, localeData);
-				};
-				
-/*
-// TODO: See if Javascript's "toLowerCase" and "toUpperCase" functions are equivalent (has the same mappings)
-Function: wint_t towlower (wint_t wc)
-Function: wint_t towupper (wint_t wc)
+				unicode.prevChar = root.DD_DOC(
+					//! REPLACE_BY("null")
+					{
+								author: "Claude Petit",
+								revision: 1,
+								params: {
+									str: {
+										type: 'string',
+										optional: false,
+										description: "A string.",
+									},
+									start: {
+										type: 'integer',
+										optional: true,
+										description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
+									},
+									end: {
+										type: 'integer',
+										optional: true,
+										description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
+									},
+									seek: {
+										type: 'integer',
+										optional: true,
+										description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
+									},
+								},
+								returns: 'object',
+								description: "Returns an object with the previous Unicode character sequence from the specified position.",
+					}
+					//! END_REPLACE()
+					, function prevChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
+							if (types.isNothing(seek)) {
+								start = (start | 0);  // null|undefined|true|false|NaN|Infinity
+							} else {
+								// Want to seek at new position
+								start = (seek | 0);
+							};
+							if (types.isNothing(end)) {
+								end = str.length;
+							} else {
+								end = (+end || 0);  // null|undefined|true|false|NaN|Infinity
+							};
+							if (start <= 0) {
+								// Begin of string reached
+								return null;
+							};
+							start--;
+							var codePoint = unicode.codePointAt(str, start);
+							if (codePoint && !codePoint.complete) {
+								start--;
+								codePoint = unicode.codePointAt(str, start);
+							};
+							if (types.isNothing(codePoint)) {
+								// Invalid index / Code point not found
+								return null;
+							};
+							if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
+								// End position reached
+								return null;
+							};
+							var chr = str.slice(start, start + codePoint.size);
+							var nextCharFn = types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]);
+							var prevCharFn = types.bind(null, unicode.prevChar, [str, start, end]);
+							return {
+								index: start,
+								codePoint: codePoint.codePoint,
+								size: codePoint.size,
+								chr: chr,
+								complete: codePoint.complete,
+								nextChar: nextCharFn,
+								prevChar: prevCharFn,
+							};
+						});
 
-*/
+
+				unicode.charsCount = root.DD_DOC(
+					//! REPLACE_BY("null")
+					{
+								author: "Claude Petit",
+								revision: 0,
+								params: {
+									str: {
+										type: 'string',
+										optional: false,
+										description: "A string.",
+									},
+									start: {
+										type: 'integer',
+										optional: true,
+										description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
+									},
+									end: {
+										type: 'integer',
+										optional: true,
+										description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
+									},
+								},
+								returns: 'integer',
+								description: "Returns the number of Unicode characters.",
+					}
+					//! END_REPLACE()
+					, function charsCount(str, /*optional*/start, /*optional*/end) {
+							var len = 0,
+								chr = unicode.nextChar(str, start, end);
+							while (chr) {
+								len++;
+								chr = chr.nextChar();
+							};
+							return len;
+						});
+
 
 				//===================================
 				// Init
