@@ -67,10 +67,6 @@
 				// Options
 				//===================================
 					
-				//__Internal__.oldSetOptions = unicode.setOptions;
-				//unicode.setOptions = function setOptions(/*paramarray*/) {
-				//};
-				
 				//unicode.setOptions({
 				//}, _options);
 				
