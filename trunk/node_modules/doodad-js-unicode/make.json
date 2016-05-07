@@ -27,7 +27,6 @@
 	"dependencies": [
 		{
 			"name": "doodad-js",
-			"optional": false,
 			"client": true,
 			"server": true,
 			"browserify": true
