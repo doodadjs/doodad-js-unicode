@@ -60,6 +60,7 @@
 				//===================================
 					
 				var __Internal__ = {
+					supportsCodePoint: false,
 				};
 				
 				
@@ -79,7 +80,6 @@
 					types.eval("'\\u{00010428}'");
 					__Internal__.supportsCodePoint = true;
 				} catch (ex) {
-					__Internal__.supportsCodePoint = false;
 				};
 				
 				var __Natives__ = {
