@@ -43,7 +43,7 @@
 		DD_MODULES['Doodad.Tools.Unicode'] = {
 			version: /*! REPLACE_BY(TO_SOURCE(VERSION(MANIFEST("name")))) */ null /*! END_REPLACE() */,
 			
-			create: function create(root, /*optional*/_options) {
+			create: function create(root, /*optional*/_options, _shared) {
 				"use strict";
 
 				//===================================
@@ -65,14 +65,6 @@
 				
 				
 				//===================================
-				// Options
-				//===================================
-					
-				//unicode.setOptions({
-				//}, _options);
-				
-
-				//===================================
 				// Native functions
 				//===================================
 					
@@ -82,7 +74,7 @@
 				} catch (ex) {
 				};
 				
-				var __Natives__ = {
+				types.complete(_shared.Natives, {
 					// "fromCodePoint"
 					stringFromCharCode: String.fromCharCode,
 					stringFromCodePoint: (__Internal__.supportsCodePoint && types.isNativeFunction(String.fromCodePoint) ? String.fromCodePoint : undefined),
@@ -90,9 +82,9 @@
 					// "codePointAt"
 					stringCharCodeAt: String.prototype.charCodeAt,
 					stringCodePointAt: (__Internal__.supportsCodePoint && types.isNativeFunction(String.prototype.codePointAt) ? String.prototype.codePointAt : undefined),
-				};
+				});
 				
-				if (!__Natives__.stringFromCodePoint || !__Natives__.stringCodePointAt) {
+				if (!_shared.Natives.stringFromCodePoint || !_shared.Natives.stringCodePointAt) {
 					// Native function may got busted.
 					__Internal__.supportsCodePoint = false;
 				};
@@ -220,13 +212,13 @@
 								description: "Returns string from an Unicode 'code point'.",
 					}
 					//! END_REPLACE()
-					, (__Internal__.supportsCodePoint ? __Natives__.stringFromCodePoint : function fromCodePoint(codePoint) {
+					, (__Internal__.supportsCodePoint ? _shared.Natives.stringFromCodePoint : function fromCodePoint(codePoint) {
 						var surrogates = unicode.codePointToCharCodes(codePoint);
 					
-						var chr = __Natives__.stringFromCharCode(surrogates.leadSurrogate);
+						var chr = _shared.Natives.stringFromCharCode(surrogates.leadSurrogate);
 						
 						if (!types.isNothing(surrogates.tailSurrogate)) {
-							chr += __Natives__.stringFromCharCode(surrogates.tailSurrogate);
+							chr += _shared.Natives.stringFromCharCode(surrogates.tailSurrogate);
 						};
 						
 						return chr;
@@ -257,7 +249,7 @@
 						function codePointAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var codePoint = __Natives__.stringCodePointAt.call(str, index);
+							var codePoint = _shared.Natives.stringCodePointAt.call(str, index);
 							
 							if (codePoint === undefined) {
 								// Invalid index
@@ -294,14 +286,14 @@
 						} : function codePointAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var leadSurrogate = __Natives__.stringCharCodeAt.call(str, index);
+							var leadSurrogate = _shared.Natives.stringCharCodeAt.call(str, index);
 
 							if (types.isNaN(leadSurrogate)) {
 								// Invalid index
 								return null;
 							};
 							
-							var tailSurrogate = __Natives__.stringCharCodeAt.call(str, index + 1);
+							var tailSurrogate = _shared.Natives.stringCharCodeAt.call(str, index + 1);
 							
 							var surrogates = {
 								leadSurrogate: leadSurrogate,
@@ -353,6 +345,8 @@
 							return str.slice(index, index + codePoint.size);
 						});
 
+				unicode.Navigator = function () {}; // constructor
+				
 				unicode.nextChar = root.DD_DOC(
 					//! REPLACE_BY("null")
 					{
@@ -410,17 +404,15 @@
 								return null;
 							};
 							var chr = str.slice(start, start + codePoint.size);
-							var nextCharFn = types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]);
-							var prevCharFn = types.bind(null, unicode.prevChar, [str, start, end]);
-							return {
-								index: start,
-								codePoint: codePoint.codePoint,
-								size: codePoint.size,
-								chr: chr,
-								complete: codePoint.complete,
-								nextChar: nextCharFn,
-								prevChar: prevCharFn,
-							};
+							var nav = ((this instanceof unicode.Navigator) ? this : new unicode.Navigator());
+							nav.index = start;
+							nav.codePoint = codePoint.codePoint;
+							nav.size = codePoint.size;
+							nav.chr = chr;
+							nav.complete = codePoint.complete;
+							nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
+							nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
+							return nav;
 						});
 
 
@@ -486,17 +478,15 @@
 								return null;
 							};
 							var chr = str.slice(start, start + codePoint.size);
-							var nextCharFn = types.bind(null, unicode.nextChar, [str, start + codePoint.size, end]);
-							var prevCharFn = types.bind(null, unicode.prevChar, [str, start, end]);
-							return {
-								index: start,
-								codePoint: codePoint.codePoint,
-								size: codePoint.size,
-								chr: chr,
-								complete: codePoint.complete,
-								nextChar: nextCharFn,
-								prevChar: prevCharFn,
-							};
+							var nav = ((this instanceof unicode.Navigator) ? this : new unicode.Navigator());
+							nav.index = start;
+							nav.codePoint = codePoint.codePoint;
+							nav.size = codePoint.size;
+							nav.chr = chr;
+							nav.complete = codePoint.complete;
+							nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
+							nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
+							return nav;
 						});
 
 
