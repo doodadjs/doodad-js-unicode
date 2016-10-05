@@ -1,6 +1,6 @@
 {
   "name": "doodad-js-unicode",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "stage": "a",
   "description": "doodad-js Unicode Tools (alpha)",
   "files": [
@@ -10,5 +10,13 @@
 	"doodad-js",
 	"unicode"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/doodadjs/doodad-js-unicode.git"
+  },
+  "bugs": {
+    "url": "https://github.com/doodadjs/doodad-js-unicode/issues",
+    "email": "doodadjs@gmail.com"
+  },
   "tonicExampleFilename": "tonic.js"
 }
