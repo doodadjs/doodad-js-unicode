@@ -1,8 +1,7 @@
 {
   "name": "doodad-js-unicode",
-  "version": "0.7.0",
-  "stage": "a",
   "description": "doodad-js Unicode Tools (alpha)",
+  "version": "0.0.0",
   "files": [
 	"tonic.js"
   ],
