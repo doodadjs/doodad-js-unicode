@@ -79,7 +79,7 @@ module.exports = {
 				// Unicode 
 				//===================================
 
-				unicode.codePointToCharCodes = root.DD_DOC(
+				unicode.ADD('codePointToCharCodes', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -116,9 +116,9 @@ module.exports = {
 							leadSurrogate: leadSurrogate, 
 							tailSurrogate: tailSurrogate,
 						};
-					}));
+					})));
 
-				unicode.charCodesToCodePoint = root.DD_DOC(
+				unicode.ADD('charCodesToCodePoint', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -180,9 +180,9 @@ module.exports = {
 								complete: true,
 								valid: true,
 							};
-					});
+					}));
 
-				unicode.fromCodePoint = root.DD_DOC(
+				unicode.ADD('fromCodePoint', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -208,9 +208,9 @@ module.exports = {
 						};
 						
 						return chr;
-					}));
+					})));
 
-				unicode.codePointAt = root.DD_DOC(
+				unicode.ADD('codePointAt', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -290,9 +290,9 @@ module.exports = {
 							};
 
 							return unicode.charCodesToCodePoint(surrogates);
-						}));
+						})));
 
-				unicode.charAt = root.DD_DOC(
+				unicode.ADD('charAt', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -329,11 +329,11 @@ module.exports = {
 							};
 							
 							return str.slice(index, index + codePoint.size);
-						});
+						}));
 
-				unicode.Navigator = function () {}; // constructor
+				unicode.ADD('Navigator', function () {}); // constructor
 				
-				unicode.nextChar = root.DD_DOC(
+				unicode.ADD('nextChar', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -399,10 +399,10 @@ module.exports = {
 							nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
 							nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
 							return nav;
-						});
+						}));
 
 
-				unicode.prevChar = root.DD_DOC(
+				unicode.ADD('prevChar', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -473,10 +473,10 @@ module.exports = {
 							nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
 							nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
 							return nav;
-						});
+						}));
 
 
-				unicode.charsCount = root.DD_DOC(
+				unicode.ADD('charsCount', root.DD_DOC(
 					//! REPLACE_IF(IS_UNSET('debug'), "null")
 					{
 								author: "Claude Petit",
@@ -510,7 +510,7 @@ module.exports = {
 								chr = chr.nextChar();
 							};
 							return len;
-						});
+						}));
 
 
 				//===================================
