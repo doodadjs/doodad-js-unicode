@@ -36,7 +36,7 @@ module.exports = {
 				// Get namespaces
 				//===================================
 					
-				var doodad = root.Doodad,
+				const doodad = root.Doodad,
 					types = doodad.Types,
 					tools = doodad.Tools,
 					unicode = tools.Unicode;
@@ -45,7 +45,7 @@ module.exports = {
 				// Internal
 				//===================================
 					
-				var __Internal__ = {
+				const __Internal__ = {
 					supportsCodePoint: false,
 				};
 				
@@ -107,10 +107,10 @@ module.exports = {
 						codePoint -= 0x10000;
 					
 						// Shift right to get to most significant 10 bits
-						var leadSurrogate = 0xD800 + (codePoint >> 10);
+						const leadSurrogate = 0xD800 + (codePoint >> 10);
 					
 						// Mask to get least significant 10 bits
-						var tailSurrogate = 0xDC00 + (codePoint & 0x03FF);
+						const tailSurrogate = 0xDC00 + (codePoint & 0x03FF);
 					
 						return {
 							leadSurrogate: leadSurrogate, 
@@ -135,7 +135,7 @@ module.exports = {
 					}
 					//! END_REPLACE()
 					, function charCodesToCodePoint(surrogates) {
-							var leadSurrogate = surrogates.leadSurrogate;
+							const leadSurrogate = surrogates.leadSurrogate;
 						
 							if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
 								return {
@@ -146,7 +146,7 @@ module.exports = {
 								};
 							};
 					
-							var tailSurrogate = surrogates.tailSurrogate;
+							const tailSurrogate = surrogates.tailSurrogate;
 					
 							if (types.isNothing(tailSurrogate)) {
 								// Incomplete UTF16 sequence
@@ -168,7 +168,7 @@ module.exports = {
 								};
 							};
 					
-							var codePoint = tailSurrogate - 0xDC00;
+							let codePoint = tailSurrogate - 0xDC00;
 					
 							codePoint += ((leadSurrogate - 0xD800) << 10);
 					
@@ -199,9 +199,9 @@ module.exports = {
 					}
 					//! END_REPLACE()
 					, (__Internal__.supportsCodePoint ? _shared.Natives.stringFromCodePoint : function fromCodePoint(codePoint) {
-						var surrogates = unicode.codePointToCharCodes(codePoint);
+						const surrogates = unicode.codePointToCharCodes(codePoint);
 					
-						var chr = _shared.Natives.stringFromCharCode(surrogates.leadSurrogate);
+						let chr = _shared.Natives.stringFromCharCode(surrogates.leadSurrogate);
 						
 						if (!types.isNothing(surrogates.tailSurrogate)) {
 							chr += _shared.Natives.stringFromCharCode(surrogates.tailSurrogate);
@@ -235,7 +235,7 @@ module.exports = {
 						function codePointAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var codePoint = _shared.Natives.stringCodePointAt.call(str, index);
+							const codePoint = _shared.Natives.stringCodePointAt.call(str, index);
 							
 							if (codePoint === undefined) {
 								// Invalid index
@@ -272,16 +272,16 @@ module.exports = {
 						} : function codePointAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var leadSurrogate = _shared.Natives.stringCharCodeAt.call(str, index);
+							const leadSurrogate = _shared.Natives.stringCharCodeAt.call(str, index);
 
 							if (types.isNaN(leadSurrogate)) {
 								// Invalid index
 								return null;
 							};
 							
-							var tailSurrogate = _shared.Natives.stringCharCodeAt.call(str, index + 1);
+							const tailSurrogate = _shared.Natives.stringCharCodeAt.call(str, index + 1);
 							
-							var surrogates = {
+							const surrogates = {
 								leadSurrogate: leadSurrogate,
 							};
 							
@@ -316,7 +316,7 @@ module.exports = {
 					, function charAt(str, /*optional*/index) {
 							index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-							var codePoint = unicode.codePointAt(str, index);
+							const codePoint = unicode.codePointAt(str, index);
 							
 							if (types.isNothing(codePoint)) {
 								// Invalid index
@@ -380,7 +380,7 @@ module.exports = {
 								// End position reached
 								return null;
 							};
-							var codePoint = unicode.codePointAt(str, start);
+							const codePoint = unicode.codePointAt(str, start);
 							if (types.isNothing(codePoint)) {
 								// Invalid index
 								return null;
@@ -389,8 +389,8 @@ module.exports = {
 								// End position reached
 								return null;
 							};
-							var chr = str.slice(start, start + codePoint.size);
-							var nav = ((this instanceof unicode.Navigator) ? this : new unicode.Navigator());
+							const chr = str.slice(start, start + codePoint.size);
+							const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
 							nav.index = start;
 							nav.codePoint = codePoint.codePoint;
 							nav.size = codePoint.size;
@@ -450,7 +450,7 @@ module.exports = {
 								return null;
 							};
 							start--;
-							var codePoint = unicode.codePointAt(str, start);
+							let codePoint = unicode.codePointAt(str, start);
 							if (codePoint && !codePoint.complete) {
 								start--;
 								codePoint = unicode.codePointAt(str, start);
@@ -463,8 +463,8 @@ module.exports = {
 								// End position reached
 								return null;
 							};
-							var chr = str.slice(start, start + codePoint.size);
-							var nav = ((this instanceof unicode.Navigator) ? this : new unicode.Navigator());
+							const chr = str.slice(start, start + codePoint.size);
+							const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
 							nav.index = start;
 							nav.codePoint = codePoint.codePoint;
 							nav.size = codePoint.size;
@@ -503,7 +503,7 @@ module.exports = {
 					}
 					//! END_REPLACE()
 					, function charsCount(str, /*optional*/start, /*optional*/end) {
-							var len = 0,
+							let len = 0,
 								chr = unicode.nextChar(str, start, end);
 							while (chr) {
 								len++;
