@@ -55,12 +55,12 @@ module.exports = {
 				//===================================
 					
 				try {
-					types.eval("'\\u{00010428}'");
+					tools.eval("'\\u{00010428}'");
 					__Internal__.supportsCodePoint = true;
 				} catch (ex) {
 				};
 				
-				types.complete(_shared.Natives, {
+				tools.complete(_shared.Natives, {
 					// "fromCodePoint"
 					stringFromCharCode: String.fromCharCode,
 					stringFromCodePoint: (__Internal__.supportsCodePoint && types.isNativeFunction(String.fromCodePoint) ? String.fromCodePoint : undefined),
