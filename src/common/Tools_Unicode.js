@@ -53,26 +53,13 @@ exports.add = function add(DD_MODULES) {
 			// Native functions
 			//===================================
 					
-			try {
-				tools.eval("'\\u{00010428}'");
-				__Internal__.supportsCodePoint = true;
-			} catch (ex) {
-			};
-				
 			tools.complete(_shared.Natives, {
 				// "fromCodePoint"
-				stringFromCharCode: String.fromCharCode,
-				stringFromCodePoint: (__Internal__.supportsCodePoint && types.isNativeFunction(String.fromCodePoint) ? String.fromCodePoint : undefined),
+				stringFromCodePoint: String.fromCodePoint,
 					
 				// "codePointAt"
-				stringCharCodeAt: String.prototype.charCodeAt,
-				stringCodePointAt: (__Internal__.supportsCodePoint && types.isNativeFunction(String.prototype.codePointAt) ? String.prototype.codePointAt : undefined),
+				stringCodePointAtCall: String.prototype.codePointAt.call.bind(String.prototype.codePointAt),
 			});
-				
-			if (!_shared.Natives.stringFromCodePoint || !_shared.Natives.stringCodePointAt) {
-				// Native function may got busted.
-				__Internal__.supportsCodePoint = false;
-			};
 				
 			//===================================
 			// Unicode 
@@ -185,7 +172,7 @@ exports.add = function add(DD_MODULES) {
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
 							author: "Claude Petit",
-							revision: 1,
+							revision: 2,
 							params: {
 								codePoint: {
 									type: 'integer',
@@ -197,23 +184,13 @@ exports.add = function add(DD_MODULES) {
 							description: "Returns string from an Unicode 'code point'.",
 				}
 				//! END_REPLACE()
-				, (__Internal__.supportsCodePoint ? _shared.Natives.stringFromCodePoint : function fromCodePoint(codePoint) {
-					const surrogates = unicode.codePointToCharCodes(codePoint);
-					
-					let chr = _shared.Natives.stringFromCharCode(surrogates.leadSurrogate);
-						
-					if (!types.isNothing(surrogates.tailSurrogate)) {
-						chr += _shared.Natives.stringFromCharCode(surrogates.tailSurrogate);
-					};
-						
-					return chr;
-				})));
+				, _shared.Natives.stringFromCodePoint));
 
 			unicode.ADD('codePointAt', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
 							author: "Claude Petit",
-							revision: 1,
+							revision: 2,
 							params: {
 								str: {
 									type: 'string',
@@ -230,66 +207,43 @@ exports.add = function add(DD_MODULES) {
 							description: "Returns an array of two items : The Unicode 'code point' from a string at the specified position, and the character's length.",
 				}
 				//! END_REPLACE()
-				, (__Internal__.supportsCodePoint ?
-					function codePointAt(str, /*optional*/index) {
-						index = (index | 0);  // null|undefined|true|false|NaN|Infinity
+				, function codePointAt(str, /*optional*/index) {
+					index = (index | 0);  // null|undefined|true|false|NaN|Infinity
 
-						const codePoint = _shared.Natives.stringCodePointAt.call(str, index);
+					const codePoint = _shared.Natives.stringCodePointAtCall(str, index);
 							
-						if (codePoint === undefined) {
-							// Invalid index
-							return null;
-						};
+					if (codePoint === undefined) {
+						// Invalid index
+						return null;
+					};
 							
-						if ((codePoint >= 0xD800) && (codePoint <= 0xDFFF)) {
-							if ((index + 1) >= str.length) {
-								// Incomplete UTF16 sequence.
-								return {
-									codePoint: codePoint,
-									size: 2,
-									complete: false,
-									valid: false,
-								};
-							} else {
-								// Invalid UTF16 sequence. Returns the lead surrogate.
-								return {
-									codePoint: codePoint,
-									size: 1,
-									complete: true,
-									valid: false,
-								};
-							};
-						} else {
+					if ((codePoint >= 0xD800) && (codePoint <= 0xDFFF)) {
+						if ((index + 1) >= str.length) {
+							// Incomplete UTF16 sequence.
 							return {
 								codePoint: codePoint,
-								size: (codePoint >= 0x10000 ? 2 : 1),
+								size: 2,
+								complete: false,
+								valid: false,
+							};
+						} else {
+							// Invalid UTF16 sequence. Returns the lead surrogate.
+							return {
+								codePoint: codePoint,
+								size: 1,
 								complete: true,
-								valid: true,
+								valid: false,
 							};
 						};
-							
-					} : function codePointAt(str, /*optional*/index) {
-						index = (index | 0);  // null|undefined|true|false|NaN|Infinity
-
-						const leadSurrogate = _shared.Natives.stringCharCodeAt.call(str, index);
-
-						if (types.isNaN(leadSurrogate)) {
-							// Invalid index
-							return null;
+					} else {
+						return {
+							codePoint: codePoint,
+							size: (codePoint >= 0x10000 ? 2 : 1),
+							complete: true,
+							valid: true,
 						};
-							
-						const tailSurrogate = _shared.Natives.stringCharCodeAt.call(str, index + 1);
-							
-						const surrogates = {
-							leadSurrogate: leadSurrogate,
-						};
-							
-						if (!types.isNaN(tailSurrogate)) {
-							surrogates.tailSurrogate = tailSurrogate;
-						};
-
-						return unicode.charCodesToCodePoint(surrogates);
-					})));
+					};
+				}));
 
 			unicode.ADD('charAt', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
