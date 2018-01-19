@@ -44,10 +44,9 @@ exports.add = function add(DD_MODULES) {
 			// Internal
 			//===================================
 					
-			const __Internal__ = {
-				supportsCodePoint: false,
-			};
-				
+			//const __Internal__ = {
+			//};
+			
 				
 			//===================================
 			// Native functions
@@ -208,7 +207,7 @@ exports.add = function add(DD_MODULES) {
 				}
 				//! END_REPLACE()
 				, function codePointAt(str, /*optional*/index) {
-					index = (index | 0);  // null|undefined|true|false|NaN|Infinity
+					index |= 0;  // null|undefined|true|false|NaN|Infinity
 
 					const codePoint = _shared.Natives.stringCodePointAtCall(str, index);
 							
@@ -267,7 +266,7 @@ exports.add = function add(DD_MODULES) {
 				}
 				//! END_REPLACE()
 				, function charAt(str, /*optional*/index) {
-						index = (index | 0);  // null|undefined|true|false|NaN|Infinity
+						index |= 0;  // null|undefined|true|false|NaN|Infinity
 
 						const codePoint = unicode.codePointAt(str, index);
 							
@@ -388,10 +387,10 @@ exports.add = function add(DD_MODULES) {
 				//! END_REPLACE()
 				, function prevChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
 						if (types.isNothing(seek)) {
-							start = (start | 0);  // null|undefined|true|false|NaN|Infinity
+							start |= 0;  // null|undefined|true|false|NaN|Infinity
 						} else {
 							// Want to seek at new position
-							start = (seek | 0);
+							start |= 0;
 						};
 						if (types.isNothing(end)) {
 							end = str.length;
