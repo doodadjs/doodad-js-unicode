@@ -318,7 +318,7 @@ exports.add = function add(DD_MODULES) {
 				//! END_REPLACE()
 				, function nextChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
 						if (types.isNothing(seek)) {
-							start = (start | 0);  // null|undefined|true|false|NaN|Infinity
+							start |= 0;  // null|undefined|true|false|NaN|Infinity
 						} else {
 							// Want to seek at new position
 							start = (seek | 0);
