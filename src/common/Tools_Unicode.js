@@ -37,34 +37,34 @@ exports.add = function add(modules) {
 			//===================================
 			// Get namespaces
 			//===================================
-					
+
 			const doodad = root.Doodad,
 				types = doodad.Types,
 				tools = doodad.Tools,
 				unicode = tools.Unicode;
-					
+
 			//===================================
 			// Internal
 			//===================================
-					
+
 			//const __Internal__ = {
 			//};
-			
-				
+
+
 			//===================================
 			// Native functions
 			//===================================
-					
+
 			tools.complete(_shared.Natives, {
 				// "fromCodePoint"
 				stringFromCodePoint: String.fromCodePoint,
-					
+
 				// "codePointAt"
 				stringCodePointAtCall: String.prototype.codePointAt.call.bind(String.prototype.codePointAt),
 			});
-				
+
 			//===================================
-			// Unicode 
+			// Unicode
 			//===================================
 
 			unicode.ADD('codePointToCharCodes', root.DD_DOC(
@@ -88,20 +88,20 @@ exports.add = function add(modules) {
 
 					if (codePoint < 0x10000) {
 						return {
-							leadSurrogate: codePoint, 
+							leadSurrogate: codePoint,
 						};
 					};
-					
+
 					codePoint -= 0x10000;
-					
+
 					// Shift right to get to most significant 10 bits
 					const leadSurrogate = 0xD800 + (codePoint >> 10);
-					
+
 					// Mask to get least significant 10 bits
 					const tailSurrogate = 0xDC00 + (codePoint & 0x03FF);
-					
+
 					return {
-						leadSurrogate: leadSurrogate, 
+						leadSurrogate: leadSurrogate,
 						tailSurrogate: tailSurrogate,
 					};
 				})));
@@ -124,7 +124,7 @@ exports.add = function add(modules) {
 				//! END_REPLACE()
 				, function charCodesToCodePoint(surrogates) {
 						const leadSurrogate = surrogates.leadSurrogate;
-						
+
 						if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
 							return {
 								codePoint: leadSurrogate,
@@ -133,9 +133,9 @@ exports.add = function add(modules) {
 								valid: true,
 							};
 						};
-					
+
 						const tailSurrogate = surrogates.tailSurrogate;
-					
+
 						if (types.isNothing(tailSurrogate)) {
 							// Incomplete UTF16 sequence
 							return {
@@ -145,7 +145,7 @@ exports.add = function add(modules) {
 								valid: false,
 							};
 						};
-					
+
 						if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
 							// Invalid UTF16 sequence. Returns the lead surrogate.
 							return {
@@ -155,13 +155,13 @@ exports.add = function add(modules) {
 								valid: false,
 							};
 						};
-					
+
 						let codePoint = tailSurrogate - 0xDC00;
-					
+
 						codePoint += ((leadSurrogate - 0xD800) << 10);
-					
+
 						codePoint += 0x10000;
-					
+
 						return {
 							codePoint: codePoint,
 							size: 2,
@@ -213,12 +213,12 @@ exports.add = function add(modules) {
 					index |= 0;  // null|undefined|true|false|NaN|Infinity
 
 					const codePoint = _shared.Natives.stringCodePointAtCall(str, index);
-							
+
 					if (codePoint === undefined) {
 						// Invalid index
 						return null;
 					};
-							
+
 					if ((codePoint >= 0xD800) && (codePoint <= 0xDFFF)) {
 						if ((index + 1) >= str.length) {
 							// Incomplete UTF16 sequence.
@@ -272,22 +272,22 @@ exports.add = function add(modules) {
 						index |= 0;  // null|undefined|true|false|NaN|Infinity
 
 						const codePoint = unicode.codePointAt(str, index);
-							
+
 						if (types.isNothing(codePoint)) {
 							// Invalid index
 							return null;
 						};
-					
+
 						if (!codePoint.valid) {
 							// Incomplete or Invalid UTF16 sequence
 							return "";
 						};
-							
+
 						return str.slice(index, index + codePoint.size);
 					}));
 
 			unicode.ADD('Navigator', function () {}); // constructor
-				
+
 			unicode.ADD('nextChar', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
