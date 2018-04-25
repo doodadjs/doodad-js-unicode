@@ -26,7 +26,7 @@
 
 //! IF_SET("mjs")
 //! ELSE()
-	"use strict";
+"use strict";
 //! END_IF()
 
 exports.add = function add(modules) {
@@ -70,17 +70,17 @@ exports.add = function add(modules) {
 			unicode.ADD('codePointToCharCodes', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 0,
-							params: {
-								codePoint: {
-									type: 'integer',
-									optional: false,
-									description: "Code point.",
-								},
-							},
-							returns: 'object',
-							description: "Returns code point surrogates.",
+					author: "Claude Petit",
+					revision: 0,
+					params: {
+						codePoint: {
+							type: 'integer',
+							optional: false,
+							description: "Code point.",
+						},
+					},
+					returns: 'object',
+					description: "Returns code point surrogates.",
 				}
 				//! END_REPLACE()
 				, (function codePointToCharCodes(codePoint) {
@@ -109,81 +109,81 @@ exports.add = function add(modules) {
 			unicode.ADD('charCodesToCodePoint', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 0,
-							params: {
-								surrogates: {
-									type: 'object',
-									optional: false,
-									description: "Surrogates.",
-								},
-							},
-							returns: 'object',
-							description: "Returns code point from surrogates.",
+					author: "Claude Petit",
+					revision: 0,
+					params: {
+						surrogates: {
+							type: 'object',
+							optional: false,
+							description: "Surrogates.",
+						},
+					},
+					returns: 'object',
+					description: "Returns code point from surrogates.",
 				}
 				//! END_REPLACE()
 				, function charCodesToCodePoint(surrogates) {
-						const leadSurrogate = surrogates.leadSurrogate;
+					const leadSurrogate = surrogates.leadSurrogate;
 
-						if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
-							return {
-								codePoint: leadSurrogate,
-								size: 1,
-								complete: true,
-								valid: true,
-							};
-						};
-
-						const tailSurrogate = surrogates.tailSurrogate;
-
-						if (types.isNothing(tailSurrogate)) {
-							// Incomplete UTF16 sequence
-							return {
-								codePoint: leadSurrogate,
-								size: 2,
-								complete: false,
-								valid: false,
-							};
-						};
-
-						if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
-							// Invalid UTF16 sequence. Returns the lead surrogate.
-							return {
-								codePoint: leadSurrogate,
-								size: 1,
-								complete: true,
-								valid: false,
-							};
-						};
-
-						let codePoint = tailSurrogate - 0xDC00;
-
-						codePoint += ((leadSurrogate - 0xD800) << 10);
-
-						codePoint += 0x10000;
-
+					if ((leadSurrogate < 0xD800) || (leadSurrogate > 0xDFFF)) {
 						return {
-							codePoint: codePoint,
-							size: 2,
+							codePoint: leadSurrogate,
+							size: 1,
 							complete: true,
 							valid: true,
 						};
+					};
+
+					const tailSurrogate = surrogates.tailSurrogate;
+
+					if (types.isNothing(tailSurrogate)) {
+						// Incomplete UTF16 sequence
+						return {
+							codePoint: leadSurrogate,
+							size: 2,
+							complete: false,
+							valid: false,
+						};
+					};
+
+					if ((tailSurrogate < 0xDC00) || (tailSurrogate > 0xDFFF)) {
+						// Invalid UTF16 sequence. Returns the lead surrogate.
+						return {
+							codePoint: leadSurrogate,
+							size: 1,
+							complete: true,
+							valid: false,
+						};
+					};
+
+					let codePoint = tailSurrogate - 0xDC00;
+
+					codePoint += ((leadSurrogate - 0xD800) << 10);
+
+					codePoint += 0x10000;
+
+					return {
+						codePoint: codePoint,
+						size: 2,
+						complete: true,
+						valid: true,
+					};
 				}));
 
 			unicode.ADD('fromCodePoint', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 2,
-							params: {
-								codePoint: {
-									type: 'integer',
-									optional: false,
-									description: "Code point.",
-								},
-							},
-							returns: 'string',
-							description: "Returns string from an Unicode 'code point'.",
+					author: "Claude Petit",
+					revision: 2,
+					params: {
+						codePoint: {
+							type: 'integer',
+							optional: false,
+							description: "Code point.",
+						},
+					},
+					returns: 'string',
+					description: "Returns string from an Unicode 'code point'.",
 				}
 				//! END_REPLACE()
 				, _shared.Natives.stringFromCodePoint));
@@ -191,22 +191,22 @@ exports.add = function add(modules) {
 			unicode.ADD('codePointAt', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 2,
-							params: {
-								str: {
-									type: 'string',
-									optional: false,
-									description: "A string.",
-								},
-								index: {
-									type: 'integer',
-									optional: true,
-									description: "Position. Default is '0'.",
-								},
-							},
-							returns: 'array',
-							description: "Returns an array of two items : The Unicode 'code point' from a string at the specified position, and the character's length.",
+					author: "Claude Petit",
+					revision: 2,
+					params: {
+						str: {
+							type: 'string',
+							optional: false,
+							description: "A string.",
+						},
+						index: {
+							type: 'integer',
+							optional: true,
+							description: "Position. Default is '0'.",
+						},
+					},
+					returns: 'array',
+					description: "Returns an array of two items : The Unicode 'code point' from a string at the specified position, and the character's length.",
 				}
 				//! END_REPLACE()
 				, function codePointAt(str, /*optional*/index) {
@@ -250,222 +250,222 @@ exports.add = function add(modules) {
 			unicode.ADD('charAt', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 1,
-							params: {
-								str: {
-									type: 'string',
-									optional: false,
-									description: "A string.",
-								},
-								index: {
-									type: 'integer',
-									optional: true,
-									description: "Position. Default is 0. Note: Position is not by character.",
-								},
-							},
-							returns: 'string',
-							description: "Returns the complete Unicode character sequence from the specified position. Use its 'length' property to get its size.",
+					author: "Claude Petit",
+					revision: 1,
+					params: {
+						str: {
+							type: 'string',
+							optional: false,
+							description: "A string.",
+						},
+						index: {
+							type: 'integer',
+							optional: true,
+							description: "Position. Default is 0. Note: Position is not by character.",
+						},
+					},
+					returns: 'string',
+					description: "Returns the complete Unicode character sequence from the specified position. Use its 'length' property to get its size.",
 				}
 				//! END_REPLACE()
 				, function charAt(str, /*optional*/index) {
-						index |= 0;  // null|undefined|true|false|NaN|Infinity
+					index |= 0;  // null|undefined|true|false|NaN|Infinity
 
-						const codePoint = unicode.codePointAt(str, index);
+					const codePoint = unicode.codePointAt(str, index);
 
-						if (types.isNothing(codePoint)) {
-							// Invalid index
-							return null;
-						};
+					if (types.isNothing(codePoint)) {
+						// Invalid index
+						return null;
+					};
 
-						if (!codePoint.valid) {
-							// Incomplete or Invalid UTF16 sequence
-							return "";
-						};
+					if (!codePoint.valid) {
+						// Incomplete or Invalid UTF16 sequence
+						return "";
+					};
 
-						return str.slice(index, index + codePoint.size);
-					}));
+					return str.slice(index, index + codePoint.size);
+				}));
 
 			unicode.ADD('Navigator', function () {}); // constructor
 
 			unicode.ADD('nextChar', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 1,
-							params: {
-								str: {
-									type: 'string',
-									optional: false,
-									description: "A string.",
-								},
-								start: {
-									type: 'integer',
-									optional: true,
-									description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
-								},
-								end: {
-									type: 'integer',
-									optional: true,
-									description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
-								},
-								seek: {
-									type: 'integer',
-									optional: true,
-									description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
-								},
-							},
-							returns: 'object',
-							description: "Returns an object with the next Unicode character sequence from the specified position.",
+					author: "Claude Petit",
+					revision: 1,
+					params: {
+						str: {
+							type: 'string',
+							optional: false,
+							description: "A string.",
+						},
+						start: {
+							type: 'integer',
+							optional: true,
+							description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
+						},
+						end: {
+							type: 'integer',
+							optional: true,
+							description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
+						},
+						seek: {
+							type: 'integer',
+							optional: true,
+							description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
+						},
+					},
+					returns: 'object',
+					description: "Returns an object with the next Unicode character sequence from the specified position.",
 				}
 				//! END_REPLACE()
 				, function nextChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
-						if (types.isNothing(seek)) {
-							start |= 0;  // null|undefined|true|false|NaN|Infinity
-						} else {
-							// Want to seek at new position
-							start = (seek | 0);
-						};
-						if (types.isNothing(end)) {
-							end = str.length;
-						} else {
-							end = (+end || 0);  // null|undefined|true|false|NaN|Infinity
-						};
-						if (start >= end) {
-							// End position reached
-							return null;
-						};
-						const codePoint = unicode.codePointAt(str, start);
-						if (types.isNothing(codePoint)) {
-							// Invalid index
-							return null;
-						};
-						if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
-							// End position reached
-							return null;
-						};
-						const chr = str.slice(start, start + codePoint.size);
-						const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
-						nav.index = start;
-						nav.codePoint = codePoint.codePoint;
-						nav.size = codePoint.size;
-						nav.chr = chr;
-						nav.complete = codePoint.complete;
-						nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
-						nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
-						return nav;
-					}));
+					if (types.isNothing(seek)) {
+						start |= 0;  // null|undefined|true|false|NaN|Infinity
+					} else {
+						// Want to seek at new position
+						start = (seek | 0);
+					};
+					if (types.isNothing(end)) {
+						end = str.length;
+					} else {
+						end = (+end || 0);  // null|undefined|true|false|NaN|Infinity
+					};
+					if (start >= end) {
+						// End position reached
+						return null;
+					};
+					const codePoint = unicode.codePointAt(str, start);
+					if (types.isNothing(codePoint)) {
+						// Invalid index
+						return null;
+					};
+					if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
+						// End position reached
+						return null;
+					};
+					const chr = str.slice(start, start + codePoint.size);
+					const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
+					nav.index = start;
+					nav.codePoint = codePoint.codePoint;
+					nav.size = codePoint.size;
+					nav.chr = chr;
+					nav.complete = codePoint.complete;
+					nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
+					nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
+					return nav;
+				}));
 
 
 			unicode.ADD('prevChar', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 1,
-							params: {
-								str: {
-									type: 'string',
-									optional: false,
-									description: "A string.",
-								},
-								start: {
-									type: 'integer',
-									optional: true,
-									description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
-								},
-								end: {
-									type: 'integer',
-									optional: true,
-									description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
-								},
-								seek: {
-									type: 'integer',
-									optional: true,
-									description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
-								},
-							},
-							returns: 'object',
-							description: "Returns an object with the previous Unicode character sequence from the specified position.",
+					author: "Claude Petit",
+					revision: 1,
+					params: {
+						str: {
+							type: 'string',
+							optional: false,
+							description: "A string.",
+						},
+						start: {
+							type: 'integer',
+							optional: true,
+							description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
+						},
+						end: {
+							type: 'integer',
+							optional: true,
+							description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
+						},
+						seek: {
+							type: 'integer',
+							optional: true,
+							description: "Seek to a new position. Note: Position is not by character. Exemple: unicode.nextChar('hello').nextChar().nextChar(3).nextChar().chr === 'o'",
+						},
+					},
+					returns: 'object',
+					description: "Returns an object with the previous Unicode character sequence from the specified position.",
 				}
 				//! END_REPLACE()
 				, function prevChar(str, /*optional*/start, /*optional*/end, /* <<< BIND */ /*optional*/seek) {
-						if (types.isNothing(seek)) {
-							start |= 0;  // null|undefined|true|false|NaN|Infinity
-						} else {
-							// Want to seek at new position
-							start |= 0;
-						};
-						if (types.isNothing(end)) {
-							end = str.length;
-						} else {
-							end = (+end || 0);  // null|undefined|true|false|NaN|Infinity
-						};
-						if (start <= 0) {
-							// Begin of string reached
-							return null;
-						};
+					if (types.isNothing(seek)) {
+						start |= 0;  // null|undefined|true|false|NaN|Infinity
+					} else {
+						// Want to seek at new position
+						start |= 0;
+					};
+					if (types.isNothing(end)) {
+						end = str.length;
+					} else {
+						end = (+end || 0);  // null|undefined|true|false|NaN|Infinity
+					};
+					if (start <= 0) {
+						// Begin of string reached
+						return null;
+					};
+					start--;
+					let codePoint = unicode.codePointAt(str, start);
+					if (codePoint && !codePoint.complete) {
 						start--;
-						let codePoint = unicode.codePointAt(str, start);
-						if (codePoint && !codePoint.complete) {
-							start--;
-							codePoint = unicode.codePointAt(str, start);
-						};
-						if (types.isNothing(codePoint)) {
-							// Invalid index / Code point not found
-							return null;
-						};
-						if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
-							// End position reached
-							return null;
-						};
-						const chr = str.slice(start, start + codePoint.size);
-						const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
-						nav.index = start;
-						nav.codePoint = codePoint.codePoint;
-						nav.size = codePoint.size;
-						nav.chr = chr;
-						nav.complete = codePoint.complete;
-						nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
-						nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
-						return nav;
-					}));
+						codePoint = unicode.codePointAt(str, start);
+					};
+					if (types.isNothing(codePoint)) {
+						// Invalid index / Code point not found
+						return null;
+					};
+					if (codePoint.complete && ((start + codePoint.size - 1) >= end)) {
+						// End position reached
+						return null;
+					};
+					const chr = str.slice(start, start + codePoint.size);
+					const nav = (types._instanceof(this, unicode.Navigator) ? this : new unicode.Navigator());
+					nav.index = start;
+					nav.codePoint = codePoint.codePoint;
+					nav.size = codePoint.size;
+					nav.chr = chr;
+					nav.complete = codePoint.complete;
+					nav.nextChar = types.bind(nav, unicode.nextChar, [str, start + codePoint.size, end]);
+					nav.prevChar = types.bind(nav, unicode.prevChar, [str, start, end]);
+					return nav;
+				}));
 
 
 			unicode.ADD('charsCount', root.DD_DOC(
 				//! REPLACE_IF(IS_UNSET('debug'), "null")
 				{
-							author: "Claude Petit",
-							revision: 0,
-							params: {
-								str: {
-									type: 'string',
-									optional: false,
-									description: "A string.",
-								},
-								start: {
-									type: 'integer',
-									optional: true,
-									description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
-								},
-								end: {
-									type: 'integer',
-									optional: true,
-									description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
-								},
-							},
-							returns: 'integer',
-							description: "Returns the number of Unicode characters.",
+					author: "Claude Petit",
+					revision: 0,
+					params: {
+						str: {
+							type: 'string',
+							optional: false,
+							description: "A string.",
+						},
+						start: {
+							type: 'integer',
+							optional: true,
+							description: "Start position, inclusive. Default is 0. Note: Position is not by character.",
+						},
+						end: {
+							type: 'integer',
+							optional: true,
+							description: "End position, exclusive. Default is string's length. Note: Position is not by character.",
+						},
+					},
+					returns: 'integer',
+					description: "Returns the number of Unicode characters.",
 				}
 				//! END_REPLACE()
 				, function charsCount(str, /*optional*/start, /*optional*/end) {
-						let len = 0,
-							chr = unicode.nextChar(str, start, end);
-						while (chr) {
-							len++;
-							chr = chr.nextChar();
-						};
-						return len;
-					}));
+					let len = 0,
+						chr = unicode.nextChar(str, start, end);
+					while (chr) {
+						len++;
+						chr = chr.nextChar();
+					};
+					return len;
+				}));
 
 
 			//===================================
