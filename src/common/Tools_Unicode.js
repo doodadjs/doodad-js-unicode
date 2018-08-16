@@ -60,7 +60,7 @@ exports.add = function add(modules) {
 				stringFromCodePoint: String.fromCodePoint,
 
 				// "codePointAt"
-				stringCodePointAtCall: String.prototype.codePointAt.call.bind(String.prototype.codePointAt),
+				stringCodePointAtCall: _shared.Natives.functionBindCall(String.prototype.codePointAt),
 			});
 
 			//===================================
